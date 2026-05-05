@@ -1,19 +1,25 @@
 package Vista;
 
+import Reglas.Cuenta;
 import Reglas.CuentaAhorros;
 import javax.swing.JOptionPane;
 import Reglas.CuentaCorriente;
 
 public class frmTransacciones extends javax.swing.JFrame {
-    CuentaCorriente ctaCrr = new CuentaCorriente();
-//    CuentaAhorros ctaAhr = new CuentaAhorros();
+    // Elimina o comenta esta línea, ya no la necesitas:
+    //CuentaCorriente ctaCrr = new CuentaCorriente();
+
+    Cuenta cuenta; // Puede ser CuentaCorriente o CuentaAhorros
+
     public frmTransacciones() {
         initComponents();
         setSize(600, 400);
+        cuenta = new CuentaCorriente();
+        // Si quieres probar con ahorros: cuenta = new CuentaAhorros();
         txtDps.setText("0");
         txtRetiro.setText("0");
         txtSaldo.setText("0");
-        txtHistorico.setText("0");
+        txtHistorico.setText("");
     }
 
     @SuppressWarnings("unchecked")
@@ -38,7 +44,7 @@ public class frmTransacciones extends javax.swing.JFrame {
         jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
         jLabel1.setText("Valor a Depositar: ");
         getContentPane().add(jLabel1);
-        jLabel1.setBounds(10, 50, 110, 14);
+        jLabel1.setBounds(10, 50, 110, 16);
 
         txtDps.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -51,7 +57,7 @@ public class frmTransacciones extends javax.swing.JFrame {
         jLabel2.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
         jLabel2.setText("Valor a Retirar:");
         getContentPane().add(jLabel2);
-        jLabel2.setBounds(20, 80, 100, 14);
+        jLabel2.setBounds(20, 80, 100, 16);
         getContentPane().add(txtRetiro);
         txtRetiro.setBounds(130, 80, 72, 25);
 
@@ -70,6 +76,11 @@ public class frmTransacciones extends javax.swing.JFrame {
                 btnDepositarMouseClicked(evt);
             }
         });
+        btnDepositar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnDepositarActionPerformed(evt);
+            }
+        });
         getContentPane().add(btnDepositar);
         btnDepositar.setBounds(20, 150, 90, 30);
 
@@ -86,7 +97,7 @@ public class frmTransacciones extends javax.swing.JFrame {
         jLabel6.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         jLabel6.setText("Transacciones Bancarias");
         getContentPane().add(jLabel6);
-        jLabel6.setBounds(100, 10, 152, 14);
+        jLabel6.setBounds(100, 10, 137, 14);
 
         txtHistorico.setColumns(20);
         txtHistorico.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
@@ -102,38 +113,55 @@ public class frmTransacciones extends javax.swing.JFrame {
         txtDps.setText("0");
         txtRetiro.setText("0");        
     }
+    
     public void consultar(){
-        if (!txtSaldo.getText().isEmpty()) {
-            System.out.println(CuentaCorriente.getbalance());
-            txtSaldo.setText(String.valueOf(CuentaCorriente.getbalance()));
-        }
+        // Muestra el saldo actual de la cuenta corriente usando el método de instancia
+        txtSaldo.setText(String.valueOf(cuenta.getSaldo()));
     }
+    
     private void btnDepositarMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnDepositarMouseClicked
-        if (!txtHistorico.getText().equals("")) {
-            ctaCrr.depositar(Double.parseDouble(txtDps.getText()));
-            txtHistorico.setText("Dep: " + txtDps.getText() + "\n" + txtHistorico.getText());
+        try {
+            double cantidad = Double.parseDouble(txtDps.getText());
+            if (cantidad <= 0) {
+                txtHistorico.setText("Debe ingresar un valor positivo para depositar\n" + txtHistorico.getText());
+                return;
+            }
+            cuenta.depositar(cantidad);
+            txtHistorico.setText("Dep: " + cantidad + "\n" + txtHistorico.getText());
+            consultar();
+        } catch (NumberFormatException ex) {
+            txtHistorico.setText("Ingrese un valor numérico válido\n" + txtHistorico.getText());
         }
         limpiar();
-        consultar();
     }//GEN-LAST:event_btnDepositarMouseClicked
 
     private void btnRetirarMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnRetirarMouseClicked
-        if (!txtHistorico.getText().equals("")) {
-            if(ctaCrr.getbalance() > Double.parseDouble(txtRetiro.getText())){
-                ctaCrr.retirar(Double.parseDouble(txtRetiro.getText()));
-                txtHistorico.setText("Ret: " + txtRetiro.getText() + "\n" + txtHistorico.getText());
+        try {
+            double cantidad = Double.parseDouble(txtRetiro.getText());
+            if (cantidad <= 0) {
+                txtHistorico.setText("Debe ingresar un valor positivo para retirar\n" + txtHistorico.getText());
+                return;
             }
-            else{
-                txtHistorico.setText("No tiene saldo disponible"+ "\n" + txtHistorico.getText());
+            if (cuenta.retirar(cantidad)) {
+                txtHistorico.setText("Ret: " + cantidad + "\n" + txtHistorico.getText());
+            } else {
+                txtHistorico.setText("No tiene saldo suficiente\n" + txtHistorico.getText());
             }
+            consultar();
+        } catch (NumberFormatException ex) {
+            txtHistorico.setText("Ingrese un valor numérico válido\n" + txtHistorico.getText());
         }
         limpiar();
-        consultar();
+        
     }//GEN-LAST:event_btnRetirarMouseClicked
 
     private void txtDpsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtDpsActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_txtDpsActionPerformed
+
+    private void btnDepositarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDepositarActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_btnDepositarActionPerformed
     public static void main(String args[]) {
         /* Set the Nimbus look and feel */
         //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
